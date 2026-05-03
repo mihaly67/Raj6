@@ -5,8 +5,24 @@ import argparse
 import datetime
 from pathlib import Path
 
-# A memória fájl helye (A Git repó része lesz, így a sessionök között perzisztens marad)
-MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Knowledge_Base", "agent_memory.jsonl")
+def get_repo_name():
+    """Megpróbálja kinyerni a repó nevét a git remote url-ből, fallbackként a könyvtárnév."""
+    try:
+        import subprocess
+        res = subprocess.check_output(["git", "config", "--get", "remote.origin.url"]).decode('utf-8').strip()
+        # pl. https://github.com/mihaly67/Raj6 -> Raj6
+        if res:
+            name = res.split("/")[-1]
+            if name.endswith(".git"):
+                name = name[:-4]
+            return name
+    except Exception:
+        pass
+    return os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# A memória fájl helye: szigorúan a repó nevével elkülönítve!
+REPO_NAME = get_repo_name()
+MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Knowledge_Base", REPO_NAME, "agent_memory.jsonl")
 
 def init_memory_file():
     """Létrehozza a memóriafájlt, ha még nem létezik."""
