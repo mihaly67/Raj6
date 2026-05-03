@@ -16,9 +16,15 @@ def run_daemon():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     keepalive_file = os.path.join(script_dir, ".agent_heartbeat")
 
-    # Próbáljuk megtalálni a memóriafájlt a Knowledge_Base mappában
+    # Próbáljuk megtalálni a memóriafájlt a Knowledge_Base/REPO_NAME mappában
     base_dir = os.path.dirname(script_dir)
-    memory_file = os.path.join(base_dir, "Knowledge_Base", "agent_memory.jsonl")
+    sys.path.append(os.path.join(base_dir, "ENVIRONMENT_SETUP"))
+    try:
+        from agent_memory_manager import REPO_NAME
+    except ImportError:
+        REPO_NAME = "default"
+
+    memory_file = os.path.join(base_dir, "Knowledge_Base", REPO_NAME, "agent_memory.jsonl")
 
     # Mivel egy agent turn kb 2-5 perc, 15-20 perc memóriaírás nélkül már aggasztó
     MEMORY_STALE_WARNING_SECONDS = 20 * 60
